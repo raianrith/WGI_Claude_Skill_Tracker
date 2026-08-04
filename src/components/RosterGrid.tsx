@@ -168,22 +168,72 @@ export function RosterGrid({
               Nothing shipped yet — they&apos;re still brewing the first one.
             </p>
           ) : (
-            <ul className="mt-4 space-y-3">
-              {selectedSkills.map((skill) => {
+            <ul className="mt-4 space-y-4">
+              {selectedSkills.map((skill, i) => {
                 const role = roleForSkill(skill);
                 return (
                   <li
                     key={skill.id}
-                    className="border-l-4 border-orange bg-lt-gray px-4 py-3"
+                    className="border-t-4 border-orange bg-lt-gray px-4 py-4"
                   >
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-semibold text-dk-gray">{skill.title}</p>
-                      <CategoryBadge category={skill.category} />
-                      <span className="text-xs tracking-wide text-md-gray uppercase">
-                        {role === "shipped" ? "Shipped" : "Collaborator"}
+                    <div className="flex items-start gap-3">
+                      <span className="font-display text-2xl text-lt-suede tabular-nums">
+                        {String(i + 1).padStart(2, "0")}
                       </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="font-display text-xl tracking-wide text-suede uppercase">
+                            {skill.title}
+                          </p>
+                          <CategoryBadge category={skill.category} />
+                          <span className="text-xs tracking-wide text-md-gray uppercase">
+                            {role === "shipped" ? "Shipped" : "Collaborator"}
+                          </span>
+                        </div>
+
+                        <p className="mt-3 text-sm leading-relaxed text-dk-gray">
+                          {skill.description}
+                        </p>
+
+                        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                          {skill.output_url && (
+                            <div className="border-l-4 border-orange bg-white px-3 py-2 sm:col-span-2">
+                              <p className="font-display text-xs tracking-[0.15em] text-orange uppercase">
+                                Link to output
+                              </p>
+                              <a
+                                href={skill.output_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mt-1 inline-block break-all text-sm text-orange underline decoration-orange/40 underline-offset-2 hover:decoration-orange"
+                              >
+                                Open link
+                              </a>
+                            </div>
+                          )}
+                          <div className="border-l-4 border-antique bg-white px-3 py-2">
+                            <p className="font-display text-xs tracking-[0.15em] text-antique uppercase">
+                              Time saved
+                            </p>
+                            <p className="mt-1 text-sm text-dk-gray">
+                              {skill.time_saved?.trim()
+                                ? skill.time_saved
+                                : "Not logged — still counts."}
+                            </p>
+                          </div>
+                          <div className="border-l-4 border-orange bg-white px-3 py-2">
+                            <p className="font-display text-xs tracking-[0.15em] text-orange uppercase">
+                              Fun fact
+                            </p>
+                            <p className="mt-1 text-sm text-dk-gray">
+                              {skill.fun_fact?.trim()
+                                ? skill.fun_fact
+                                : "Keeping that one close to the vest."}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <p className="mt-1 text-sm text-md-gray">{skill.description}</p>
                   </li>
                 );
               })}
