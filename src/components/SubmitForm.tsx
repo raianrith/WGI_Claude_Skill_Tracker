@@ -5,23 +5,37 @@ import { useRouter } from "next/navigation";
 import { fireShipConfetti } from "@/lib/confetti";
 import { CATEGORIES } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
-import type { Person, SkillCategory } from "@/lib/types";
+import type { Person, Skill, SkillCategory } from "@/lib/types";
+
+type EditableSkill = Pick<
+  Skill,
+  "id" | "title" | "description" | "category" | "time_saved" | "fun_fact"
+> & {
+  collaboratorIds?: string[];
+};
 
 export function SubmitForm({
   people,
   creatorId,
+  initialSkill,
 }: {
   people: Person[];
   creatorId: string;
+  initialSkill?: EditableSkill;
 }) {
   const router = useRouter();
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState<SkillCategory>("client work");
-  const [timeSaved, setTimeSaved] = useState("");
-  const [funFact, setFunFact] = useState("");
+  const editing = Boolean(initialSkill);
+  const [title, setTitle] = useState(initialSkill?.title ?? "");
+  const [description, setDescription] = useState(initialSkill?.description ?? "");
+  const [category, setCategory] = useState<SkillCategory>(
+    initialSkill?.category ?? "client work",
+  );
+  const [timeSaved, setTimeSaved] = useState(initialSkill?.time_saved ?? "");
+  const [funFact, setFunFact] = useState(initialSkill?.fun_fact ?? "");
   const [collabQuery, setCollabQuery] = useState("");
-  const [collaborators, setCollaborators] = useState<string[]>([]);
+  const [collaborators, setCollaborators] = useState<string[]>(
+    initialSkill?.collaboratorIds ?? [],
+  );
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -60,30 +74,52 @@ export function SubmitForm({
 
     startTransition(async () => {
       const supabase = createClient();
-      const { data: skill, error: skillError } = await supabase
-        .from("skills")
-        .insert({
-          creator_id: creatorId,
-          title: title.trim(),
-          description: description.trim(),
-          category,
-          time_saved: timeSaved.trim() || null,
-          fun_fact: funFact.trim() || null,
-        })
-        .select("id")
-        .single();
+      const payload = {
+        title: title.trim(),
+        description: description.trim(),
+        category,
+        time_saved: timeSaved.trim() || null,
+        fun_fact: funFact.trim() || null,
+      };
 
-      if (skillError || !skill) {
-        setError(skillError?.message ?? "Couldn't ship that — try again.");
-        return;
+      let skillId = initialSkill?.id;
+
+      if (editing && skillId) {
+        const { error: updateError } = await supabase
+          .from("skills")
+          .update(payload)
+          .eq("id", skillId)
+          .eq("creator_id", creatorId);
+
+        if (updateError) {
+          setError(updateError.message ?? "Couldn't save that — try again.");
+          return;
+        }
+
+        await supabase.from("skill_collaborators").delete().eq("skill_id", skillId);
+      } else {
+        const { data: skill, error: skillError } = await supabase
+          .from("skills")
+          .insert({
+            creator_id: creatorId,
+            ...payload,
+          })
+          .select("id")
+          .single();
+
+        if (skillError || !skill) {
+          setError(skillError?.message ?? "Couldn't ship that — try again.");
+          return;
+        }
+        skillId = skill.id;
       }
 
-      if (collaborators.length > 0) {
+      if (skillId && collaborators.length > 0) {
         const { error: collabError } = await supabase
           .from("skill_collaborators")
           .insert(
             collaborators.map((person_id) => ({
-              skill_id: skill.id,
+              skill_id: skillId,
               person_id,
             })),
           );
@@ -92,8 +128,12 @@ export function SubmitForm({
         }
       }
 
-      fireShipConfetti();
-      router.push("/");
+      if (!editing) {
+        fireShipConfetti();
+        router.push("/");
+      } else {
+        router.push("/library");
+      }
       router.refresh();
     });
   }
@@ -102,10 +142,12 @@ export function SubmitForm({
     <form onSubmit={onSubmit} className="mx-auto max-w-2xl space-y-5">
       <div>
         <h1 className="font-display text-4xl tracking-wide text-suede uppercase">
-          Ship a skill
+          {editing ? "Edit skill" : "Ship a skill"}
         </h1>
         <p className="mt-1 text-sm text-md-gray">
-          Log it once it&apos;s real. Half-baked drafts stay in your notebook.
+          {editing
+            ? "Tweak the copy, category, or collaborators — upvotes stay put."
+            : "Log it once it's real. Half-baked drafts stay in your notebook."}
         </p>
       </div>
 
@@ -233,7 +275,13 @@ export function SubmitForm({
         disabled={pending}
         className="w-full bg-orange px-4 py-3 font-display text-lg tracking-wider text-white uppercase transition-opacity hover:opacity-90 disabled:opacity-50"
       >
-        {pending ? "Shipping…" : "Ship it"}
+        {pending
+          ? editing
+            ? "Saving…"
+            : "Shipping…"
+          : editing
+            ? "Save changes"
+            : "Ship it"}
       </button>
     </form>
   );

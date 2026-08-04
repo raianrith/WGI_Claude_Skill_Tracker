@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Avatar } from "@/components/Avatar";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import { UpvoteButton } from "@/components/UpvoteButton";
@@ -12,6 +13,8 @@ export function SkillCard({
   viewerId: string;
   highlight?: boolean;
 }) {
+  const isOwner = skill.creator_id === viewerId;
+
   return (
     <article
       id={`skill-${skill.id}`}
@@ -21,13 +24,23 @@ export function SkillCard({
     >
       <div className="flex items-start justify-between gap-3">
         <CategoryBadge category={skill.category} />
-        <UpvoteButton
-          skillId={skill.id}
-          voterId={viewerId}
-          creatorId={skill.creator_id}
-          initialCount={skill.upvote_count}
-          initiallyVoted={skill.viewer_has_upvoted}
-        />
+        <div className="flex items-center gap-2">
+          {isOwner && (
+            <Link
+              href={`/edit/${skill.id}`}
+              className="border border-lt-suede px-2.5 py-1.5 text-xs tracking-wide text-md-gray uppercase transition-colors hover:border-orange hover:text-orange"
+            >
+              Edit
+            </Link>
+          )}
+          <UpvoteButton
+            skillId={skill.id}
+            voterId={viewerId}
+            creatorId={skill.creator_id}
+            initialCount={skill.upvote_count}
+            initiallyVoted={skill.viewer_has_upvoted}
+          />
+        </div>
       </div>
 
       <h3 className="mt-3 font-display text-2xl tracking-wide text-suede uppercase">
@@ -55,13 +68,16 @@ export function SkillCard({
       )}
 
       <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-lt-gray pt-3">
-        <Avatar name={skill.creator.full_name} url={skill.creator.avatar_url} size="sm" />
+        <Avatar
+          name={skill.creator.full_name}
+          url={skill.creator.avatar_url}
+          size="sm"
+        />
         <div className="min-w-0 text-sm">
           <p className="font-semibold text-dk-gray">{skill.creator.full_name}</p>
           {skill.collaborators.length > 0 && (
             <p className="truncate text-xs text-md-gray">
-              with{" "}
-              {skill.collaborators.map((c) => c.full_name).join(", ")}
+              with {skill.collaborators.map((c) => c.full_name).join(", ")}
             </p>
           )}
         </div>
