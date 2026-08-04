@@ -122,6 +122,21 @@ export function LeaderboardView({
                         {skill.description}
                       </p>
                       <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                        {skill.output_url && (
+                          <div className="border-l-4 border-orange bg-lt-gray px-3 py-2 sm:col-span-2">
+                            <p className="font-display text-xs tracking-[0.15em] text-orange uppercase">
+                              Link to output
+                            </p>
+                            <a
+                              href={skill.output_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="mt-1 inline-block break-all text-sm text-orange underline decoration-orange/40 underline-offset-2 hover:decoration-orange"
+                            >
+                              Open link
+                            </a>
+                          </div>
+                        )}
                         <div className="border-l-4 border-antique bg-lt-gray px-3 py-2">
                           <p className="font-display text-xs tracking-[0.15em] text-antique uppercase">
                             Time saved

@@ -50,8 +50,21 @@ export function SkillCard({
         {skill.description}
       </p>
 
-      {(skill.time_saved || skill.fun_fact) && (
+      {(skill.time_saved || skill.fun_fact || skill.output_url) && (
         <div className="mt-4 space-y-1 border-t border-lt-gray pt-3 text-xs text-md-gray">
+          {skill.output_url && (
+            <p>
+              <span className="font-semibold text-antique">Output: </span>
+              <a
+                href={skill.output_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="break-all text-orange underline decoration-orange/40 underline-offset-2 hover:decoration-orange"
+              >
+                Open link
+              </a>
+            </p>
+          )}
           {skill.time_saved && (
             <p>
               <span className="font-semibold text-antique">Time saved: </span>

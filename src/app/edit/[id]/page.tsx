@@ -43,6 +43,7 @@ export default async function EditSkillPage({
             category: row.category,
             time_saved: row.time_saved,
             fun_fact: row.fun_fact,
+            output_url: row.output_url,
             collaboratorIds: ((collabs ?? []) as { person_id: string }[]).map(
               (c) => c.person_id,
             ),

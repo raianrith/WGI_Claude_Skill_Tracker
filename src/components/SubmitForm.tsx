@@ -9,7 +9,13 @@ import type { Person, Skill, SkillCategory } from "@/lib/types";
 
 type EditableSkill = Pick<
   Skill,
-  "id" | "title" | "description" | "category" | "time_saved" | "fun_fact"
+  | "id"
+  | "title"
+  | "description"
+  | "category"
+  | "time_saved"
+  | "fun_fact"
+  | "output_url"
 > & {
   collaboratorIds?: string[];
 };
@@ -32,6 +38,7 @@ export function SubmitForm({
   );
   const [timeSaved, setTimeSaved] = useState(initialSkill?.time_saved ?? "");
   const [funFact, setFunFact] = useState(initialSkill?.fun_fact ?? "");
+  const [outputUrl, setOutputUrl] = useState(initialSkill?.output_url ?? "");
   const [collabQuery, setCollabQuery] = useState("");
   const [collaborators, setCollaborators] = useState<string[]>(
     initialSkill?.collaboratorIds ?? [],
@@ -63,6 +70,13 @@ export function SubmitForm({
     setCollabQuery("");
   }
 
+  function normalizeUrl(raw: string): string | null {
+    const trimmed = raw.trim();
+    if (!trimmed) return null;
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return `https://${trimmed}`;
+  }
+
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -80,6 +94,7 @@ export function SubmitForm({
         category,
         time_saved: timeSaved.trim() || null,
         fun_fact: funFact.trim() || null,
+        output_url: normalizeUrl(outputUrl),
       };
 
       let skillId = initialSkill?.id;
@@ -239,6 +254,20 @@ export function SubmitForm({
           </div>
         )}
       </div>
+
+      <label className="block">
+        <span className="mb-1 block text-xs tracking-wide text-md-gray uppercase">
+          Link to output
+        </span>
+        <input
+          value={outputUrl}
+          onChange={(e) => setOutputUrl(e.target.value)}
+          type="text"
+          inputMode="url"
+          placeholder="https://… (Claude Project, doc, Drive, whatever)"
+          className="w-full border border-lt-suede/50 bg-white px-3 py-2.5 outline-none focus:border-orange"
+        />
+      </label>
 
       <label className="block">
         <span className="mb-1 block text-xs tracking-wide text-md-gray uppercase">

@@ -17,6 +17,7 @@ export type Skill = {
   category: SkillCategory;
   time_saved: string | null;
   fun_fact: string | null;
+  output_url: string | null;
   shipped_at: string;
   created_at: string;
 };
