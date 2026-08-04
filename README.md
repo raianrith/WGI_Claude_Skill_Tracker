@@ -1,33 +1,57 @@
-# WGI Claude Skill Tracker
+# Skill Tracker
 
-Internal inventory and lifecycle tracker for Weidert Group’s Claude Skills — the reusable agent capabilities used across content, research, and client delivery work.
+Fun, slightly competitive dashboard for Weidert Group's **everyone builds 3 Claude Skills by October** rock.
 
-## Purpose
+People sign in with Google, ship skills, tag collaborators, upvote the library, and watch the agency progress bar fill up.
 
-Claude Skills are named, documented workflows (e.g. Fact-Check, Brief Builder, LinkedIn Article) that teams invoke in Claude. This project is meant to keep that catalog accurate and useful:
+## Stack
 
-- **Inventory** — which skills exist, what they do, and when they were created
-- **Status** — live, draft, deprecated, or under review
-- **Ownership** — who maintains each skill
-- **Discoverability** — a single place to browse and update the skill set
+- Next.js 14 (App Router) + TypeScript + Tailwind
+- Supabase (Auth, Postgres, Realtime)
+- canvas-confetti
+- Vercel (deploy target)
 
-Related: skills are also surfaced in the [WGI Data & Automation Hub](https://github.com/raianrith) under the **Claude Skills** category. This tracker is the dedicated home for skill-level catalog and lifecycle management.
+## Local setup
 
-## Status
+1. Copy env and fill values (already wired for the linked Supabase project in `.env.local` locally):
 
-Early project. The repository is newly initialized; application code and setup steps will land here as the tracker is built.
+```bash
+cp .env.example .env.local
+```
 
-## Roadmap (planned)
+| Variable | Purpose |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key |
+| `NEXT_PUBLIC_WORKSPACE_DOMAIN` | Google Workspace domain (default `weidert.com`) |
 
-- [ ] Skill catalog (name, purpose, created date, status, owner)
-- [ ] Add / edit / retire skills
-- [ ] Filter and search by status or owner
-- [ ] Optional sync or link with the Internal Data Initiatives Hub
+2. Install and run:
 
-## Contributing
+```bash
+npm install
+npm run dev
+```
 
-Internal WGI use. Open a PR against `main` with a short description of the change.
+Open [http://localhost:3000](http://localhost:3000).
 
-## License
+3. Supabase Auth
+   - Enable Google provider
+   - Redirect URLs: `http://localhost:3000/auth/callback` and your Vercel URL `/auth/callback`
+   - Add the same domains to the Google OAuth client
 
-Private / internal — Weidert Group.
+4. Seed the `people` table yourself (no public signup). On first login we match `people.email` (case-insensitive) and set `auth_user_id`.
+
+## Pages
+
+| Route | What it does |
+|---|---|
+| `/login` | Google OAuth, workspace-domain check |
+| `/` | Agency progress, milestones, roster pips, live ticker |
+| `/library` | Search/filter/upvote + Surprise me |
+| `/submit` | Ship a skill (confetti on success) |
+| `/leaderboard` | Crowd favorites + category mix |
+| `/not-on-roster` | Friendly bounce if email isn't seeded |
+
+## Brand
+
+Uses WGI tokens: suede `#112721`, antique `#A86A40`, orange `#FF6700`, League Gothic + Instrument Sans.
