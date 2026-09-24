@@ -9,7 +9,12 @@ export const VOTING_OPENS_ISO = "2026-09-28T08:00:00-05:00";
 /** Wed Sept 30, 2026 · 12:00 PM CDT */
 export const VOTING_CLOSES_ISO = "2026-09-30T12:00:00-05:00";
 
-export type BallotAwardId = Extract<AwardId, "unhinged" | "stolen-idea">;
+export type BallotAwardId = Extract<
+  AwardId,
+  "unhinged" | "stolen-idea" | "client-crush" | "personal-fave" | "ops-hero"
+>;
+
+export const BALLOT_AWARD_COUNT = 5;
 
 export type VotingStatus = "upcoming" | "open" | "closed";
 

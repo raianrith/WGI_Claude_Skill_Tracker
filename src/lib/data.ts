@@ -1,6 +1,7 @@
 import { SKILLS_PER_PERSON } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
 import type { Person, Skill, SkillCategory, SkillWithRelations } from "@/lib/types";
+import type { BallotAwardId } from "@/lib/voting";
 
 export async function getPeople(): Promise<Person[]> {
   const supabase = createClient();
@@ -245,7 +246,7 @@ export async function getRecentActivity(limit = 15) {
 
 export async function getMyAwardVotes(
   voterId: string,
-): Promise<Partial<Record<"unhinged" | "stolen-idea", string>>> {
+): Promise<Partial<Record<BallotAwardId, string>>> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("award_votes")
@@ -254,9 +255,9 @@ export async function getMyAwardVotes(
 
   if (error) throw error;
 
-  const votes: Partial<Record<"unhinged" | "stolen-idea", string>> = {};
+  const votes: Partial<Record<BallotAwardId, string>> = {};
   for (const row of data ?? []) {
-    const awardId = row.award_id as "unhinged" | "stolen-idea";
+    const awardId = row.award_id as BallotAwardId;
     votes[awardId] = row.skill_id as string;
   }
   return votes;

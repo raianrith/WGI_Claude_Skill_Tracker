@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ProfilePhotoButton } from "@/components/ProfilePhotoButton";
+import { VotingBanner } from "@/components/VotingBanner";
 import { createClient } from "@/lib/supabase/client";
+import { getVotingStatus } from "@/lib/voting";
 
 const LINKS = [
   { href: "/", label: "Dashboard" },
@@ -28,6 +30,7 @@ export function AppShell({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const votingStatus = getVotingStatus();
 
   async function signOut() {
     const supabase = createClient();
@@ -55,7 +58,35 @@ export function AppShell({
                 link.href === "/"
                   ? pathname === "/"
                   : pathname.startsWith(link.href);
-              const highlight = "highlight" in link && link.highlight && !active;
+              const isVote = link.href === "/vote";
+
+              if (isVote) {
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`relative ml-1 mr-1 px-4 py-2 font-display text-sm tracking-wider uppercase shadow-sm transition-transform hover:scale-[1.03] ${
+                      active
+                        ? "bg-white text-orange ring-2 ring-orange"
+                        : votingStatus === "open"
+                          ? "animate-vote-glow bg-orange text-white ring-2 ring-white/40"
+                          : "bg-orange text-white ring-2 ring-orange/70"
+                    }`}
+                  >
+                    <span className="inline-flex items-center gap-1.5">
+                      <span aria-hidden>🏆</span>
+                      Vote
+                    </span>
+                    {votingStatus === "open" && !active && (
+                      <span className="absolute -right-1 -top-1 flex h-2.5 w-2.5">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
+                        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white" />
+                      </span>
+                    )}
+                  </Link>
+                );
+              }
+
               return (
                 <Link
                   key={link.href}
@@ -63,9 +94,7 @@ export function AppShell({
                   className={`px-3 py-2 font-display text-sm tracking-wider uppercase transition-colors ${
                     active
                       ? "bg-orange text-white"
-                      : highlight
-                        ? "bg-orange/20 text-orange ring-1 ring-orange/60 hover:bg-orange hover:text-white"
-                        : "text-lt-gray hover:bg-white/10 hover:text-white"
+                      : "text-lt-gray hover:bg-white/10 hover:text-white"
                   }`}
                 >
                   {link.label}
@@ -97,6 +126,8 @@ export function AppShell({
           </div>
         </div>
       </header>
+
+      <VotingBanner pathname={pathname} />
 
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">{children}</main>
     </div>

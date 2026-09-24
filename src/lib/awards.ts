@@ -20,8 +20,8 @@ export type AwardDef = {
   name: string;
   aka: string;
   description: string;
-  /** If set, we can tease a live frontrunner from upvotes in this category */
-  upvoteCategory?: SkillCategory;
+  /** Ballot only shows skills in this category (team-vote awards) */
+  ballotCategory?: SkillCategory;
   decision: AwardDecision;
   accent: "orange" | "antique" | "suede";
 };
@@ -41,11 +41,11 @@ export const WRAP_PARTY_AWARDS: AwardDef[] = [
     id: "client-crush",
     number: "02",
     name: "Client Crush",
-    aka: "Most upvoted — client work",
+    aka: "Team vote — client work",
     description:
-      "The skill doing the most for client work. Won by the most upvotes in Client Work.",
-    upvoteCategory: "client work",
-    decision: "upvotes",
+      "The skill doing the most for client work. Won by team vote — Client Work skills only.",
+    ballotCategory: "client work",
+    decision: "team-vote",
     accent: "suede",
   },
   {
@@ -62,22 +62,22 @@ export const WRAP_PARTY_AWARDS: AwardDef[] = [
     id: "personal-fave",
     number: "04",
     name: "Personal Fave",
-    aka: "Most upvoted — personal",
+    aka: "Team vote — personal",
     description:
-      "Best skill for life outside work. Meal planners, this is your moment. Won by the most Personal upvotes.",
-    upvoteCategory: "personal",
-    decision: "upvotes",
+      "Best skill for life outside work. Meal planners, this is your moment. Won by team vote — Personal skills only.",
+    ballotCategory: "personal",
+    decision: "team-vote",
     accent: "antique",
   },
   {
     id: "ops-hero",
     number: "05",
     name: "Ops Hero",
-    aka: "Most upvoted — internal ops",
+    aka: "Team vote — internal ops",
     description:
-      "Best internal ops skill — the work behind the work. Won by the most Internal Ops upvotes.",
-    upvoteCategory: "internal ops",
-    decision: "upvotes",
+      "Best internal ops skill — the work behind the work. Won by team vote — Internal Ops skills only.",
+    ballotCategory: "internal ops",
+    decision: "team-vote",
     accent: "orange",
   },
   {
@@ -86,7 +86,7 @@ export const WRAP_PARTY_AWARDS: AwardDef[] = [
     name: "Delightfully Unhinged",
     aka: "Most delightfully weird",
     description:
-      "The weirdest, most unexpected thing anyone taught Claude to do. Won by team vote.",
+      "The weirdest, most unexpected thing anyone taught Claude to do. Won by team vote — any skill in the library.",
     decision: "team-vote",
     accent: "suede",
   },
@@ -96,7 +96,7 @@ export const WRAP_PARTY_AWARDS: AwardDef[] = [
     name: "Stolen Idea Energy",
     aka: "Most-borrowed idea",
     description:
-      "The most-borrowed idea in the library. Copying is the highest compliment. Won by team vote.",
+      "The most-borrowed idea in the library. Copying is the highest compliment. Won by team vote — any skill in the library.",
     decision: "team-vote",
     accent: "orange",
   },
@@ -105,6 +105,8 @@ export const WRAP_PARTY_AWARDS: AwardDef[] = [
 export const TEAM_VOTE_AWARDS = WRAP_PARTY_AWARDS.filter(
   (a) => a.decision === "team-vote",
 );
+
+export const TEAM_VOTE_AWARD_IDS = TEAM_VOTE_AWARDS.map((a) => a.id);
 
 export function decisionLabel(decision: AwardDecision): string {
   switch (decision) {

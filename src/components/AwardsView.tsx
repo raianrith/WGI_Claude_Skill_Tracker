@@ -26,7 +26,7 @@ const DECISION_HINT: Record<AwardDecision, string> = {
   "time-saved":
     "No campaigning needed. Highest weekly time-savings estimate wins.",
   "team-vote":
-    "Cast your pick on the Vote page. Mon 8am → Wed noon. Tallies sealed until the wrap party.",
+    "Cast your pick on the Vote page. Category awards only show matching skills. Mon 8am → Wed noon.",
 };
 
 export function AwardsView() {
@@ -43,8 +43,8 @@ export function AwardsView() {
           The awards
         </h1>
         <p className="mt-3 max-w-2xl text-sm text-lt-suede">
-          Seven trophies. Most ride on upvotes or time saved. Two need a human
-          vote — Delightfully Unhinged and Stolen Idea Energy. Winners revealed
+          Seven trophies. Crowd Favorite rides on upvotes; Time Bandit is pure
+          math. The other five need a human vote on the ballot. Winners revealed
           live at the wrap party.
         </p>
         <Link

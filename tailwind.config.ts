@@ -47,6 +47,10 @@ const config: Config = {
           "0%": { transform: "scaleX(0)" },
           "100%": { transform: "scaleX(1)" },
         },
+        "vote-glow": {
+          "0%, 100%": { boxShadow: "0 0 0 0 rgba(255, 103, 0, 0.55)" },
+          "50%": { boxShadow: "0 0 0 8px rgba(255, 103, 0, 0)" },
+        },
       },
       animation: {
         "count-up": "count-up 0.5s ease-out both",
@@ -54,6 +58,7 @@ const config: Config = {
         "ticker-in": "ticker-in 0.35s ease-out both",
         "upvote-bounce": "upvote-bounce 0.35s ease-out",
         "bar-fill": "bar-fill 1s ease-out both",
+        "vote-glow": "vote-glow 1.6s ease-in-out infinite",
       },
     },
   },

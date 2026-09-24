@@ -8,6 +8,7 @@ import { fireVoteConfetti } from "@/lib/confetti";
 import { createClient } from "@/lib/supabase/client";
 import type { SkillWithRelations } from "@/lib/types";
 import {
+  BALLOT_AWARD_COUNT,
   formatCountdown,
   formatVotingInstant,
   getVotingStatus,
@@ -20,6 +21,12 @@ import {
 
 type VotesMap = Partial<Record<BallotAwardId, string>>;
 
+const CATEGORY_LABEL: Record<string, string> = {
+  "client work": "Client Work",
+  personal: "Personal",
+  "internal ops": "Internal Ops",
+};
+
 export function VotingBallot({
   skills,
   viewerId,
@@ -31,7 +38,7 @@ export function VotingBallot({
 }) {
   const [status, setStatus] = useState<VotingStatus>(() => getVotingStatus());
   const [countdown, setCountdown] = useState("");
-  const [activeAward, setActiveAward] = useState<BallotAwardId>("unhinged");
+  const [activeAward, setActiveAward] = useState<BallotAwardId>("client-crush");
   const [votes, setVotes] = useState<VotesMap>(initialVotes);
   const [query, setQuery] = useState("");
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -64,12 +71,16 @@ export function VotingBallot({
     [],
   );
 
-  const castCount = TEAM_VOTE_AWARDS.filter((a) => votes[a.id as BallotAwardId])
-    .length;
+  const activeMeta = awardMeta[activeAward];
+  const castCount = TEAM_VOTE_AWARDS.filter(
+    (a) => votes[a.id as BallotAwardId],
+  ).length;
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
+    const category = activeMeta.ballotCategory;
     return skills.filter((skill) => {
+      if (category && skill.category !== category) return false;
       if (!q) return true;
       return (
         skill.title.toLowerCase().includes(q) ||
@@ -78,12 +89,21 @@ export function VotingBallot({
         skill.fun_fact?.toLowerCase().includes(q)
       );
     });
-  }, [skills, query]);
+  }, [skills, query, activeMeta.ballotCategory]);
 
   async function castVote(skill: SkillWithRelations) {
     if (status !== "open") return;
     if (skill.creator_id === viewerId) {
       setError("You can't vote for your own skill — humble.");
+      return;
+    }
+    if (
+      activeMeta.ballotCategory &&
+      skill.category !== activeMeta.ballotCategory
+    ) {
+      setError(
+        `This award only accepts ${CATEGORY_LABEL[activeMeta.ballotCategory]} skills.`,
+      );
       return;
     }
 
@@ -118,11 +138,15 @@ export function VotingBallot({
     setVotes((prev) => ({ ...prev, [activeAward]: skill.id }));
     setMessage(
       wasChange
-        ? `Swapped your ${awardMeta[activeAward].name} pick.`
-        : `Locked in for ${awardMeta[activeAward].name}.`,
+        ? `Swapped your ${activeMeta.name} pick.`
+        : `Locked in for ${activeMeta.name}.`,
     );
     fireVoteConfetti();
   }
+
+  const ballotHint = activeMeta.ballotCategory
+    ? `Showing ${CATEGORY_LABEL[activeMeta.ballotCategory]} skills only.`
+    : "Showing every skill in the library.";
 
   return (
     <div className="space-y-8">
@@ -146,10 +170,14 @@ export function VotingBallot({
                 Cast your ballot
               </h1>
               <p className="mt-4 text-sm leading-relaxed text-lt-suede sm:text-base">
-                Two awards need a human call:{" "}
-                <span className="text-white">Delightfully Unhinged</span> and{" "}
+                Five awards need your vote:{" "}
+                <span className="text-white">Client Crush</span>,{" "}
+                <span className="text-white">Personal Fave</span>,{" "}
+                <span className="text-white">Ops Hero</span>,{" "}
+                <span className="text-white">Delightfully Unhinged</span>, and{" "}
                 <span className="text-white">Stolen Idea Energy</span>. One pick
-                each. Tallies stay sealed until the wrap party.
+                each. Category awards stay in-lane. Tallies sealed until the wrap
+                party.
               </p>
             </div>
             <div className="min-w-[11rem] border border-white/15 bg-black/25 px-4 py-4 text-center backdrop-blur-sm">
@@ -158,10 +186,15 @@ export function VotingBallot({
               </p>
               <p className="mt-1 font-display text-5xl text-orange">
                 {castCount}
-                <span className="text-2xl text-lt-suede"> / 2</span>
+                <span className="text-2xl text-lt-suede">
+                  {" "}
+                  / {BALLOT_AWARD_COUNT}
+                </span>
               </p>
               <p className="mt-1 text-xs text-lt-suede">
-                {castCount === 2 ? "Ballot complete ✨" : "Picks locked in"}
+                {castCount === BALLOT_AWARD_COUNT
+                  ? "Ballot complete ✨"
+                  : "Picks locked in"}
               </p>
             </div>
           </div>
@@ -176,7 +209,7 @@ export function VotingBallot({
         </div>
       </header>
 
-      <section className="grid gap-3 sm:grid-cols-2">
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {TEAM_VOTE_AWARDS.map((award) => {
           const id = award.id as BallotAwardId;
           const pickedId = votes[id];
@@ -184,12 +217,16 @@ export function VotingBallot({
             ? skills.find((s) => s.id === pickedId)
             : undefined;
           const active = activeAward === id;
+          const lane = award.ballotCategory
+            ? CATEGORY_LABEL[award.ballotCategory]
+            : "Any category";
           return (
             <button
               key={award.id}
               type="button"
               onClick={() => {
                 setActiveAward(id);
+                setQuery("");
                 setMessage(null);
                 setError(null);
               }}
@@ -202,7 +239,7 @@ export function VotingBallot({
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="font-display text-xs tracking-[0.25em] text-orange uppercase">
-                    {award.number} · Team vote
+                    {award.number} · {lane}
                   </p>
                   <h2 className="mt-1 font-display text-3xl tracking-wide text-suede uppercase">
                     {award.name}
@@ -245,13 +282,14 @@ export function VotingBallot({
               Ballot for
             </p>
             <h3 className="font-display text-4xl tracking-wide text-suede uppercase">
-              {awardMeta[activeAward].name}
+              {activeMeta.name}
             </h3>
             <p className="mt-1 max-w-xl text-sm text-md-gray">
+              {ballotHint}{" "}
               {status === "open"
                 ? "Tap a skill to cast (or change) your vote. You can't vote for your own."
                 : status === "upcoming"
-                  ? "Browse the ballot now — voting unlocks Monday at 8am."
+                  ? "Browse now — voting unlocks Monday at 8am."
                   : "Voting is closed. See you at the wrap party."}
             </p>
           </div>
@@ -261,7 +299,7 @@ export function VotingBallot({
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search the library…"
+              placeholder="Search this ballot…"
               className="w-full border border-lt-suede/60 bg-white px-3 py-2.5 text-sm outline-none ring-orange focus:ring-2"
             />
           </label>
@@ -349,7 +387,9 @@ export function VotingBallot({
 
         {filtered.length === 0 && (
           <p className="border border-dashed border-lt-suede bg-white px-4 py-8 text-center text-sm text-md-gray">
-            No skills match that search. Try another word — or clear the box.
+            No skills on this ballot
+            {query ? " match that search" : ""}. Try another award tab
+            {query ? " or clear the search" : ""}.
           </p>
         )}
       </section>
@@ -360,8 +400,8 @@ export function VotingBallot({
         </p>
         <ul className="mt-3 space-y-2 text-sm text-md-gray">
           <li>
-            <span className="font-semibold text-suede">Crowd Favorite, Client Crush, Personal Fave, Ops Hero</span>{" "}
-            — decided by upvotes in the library. Keep cheering.
+            <span className="font-semibold text-suede">Crowd Favorite</span> —
+            decided by upvotes in the library. Keep cheering.
           </li>
           <li>
             <span className="font-semibold text-suede">Time Bandit</span> — pure
@@ -384,7 +424,11 @@ function StatusChip({
     return (
       <span className="inline-flex items-center gap-2 bg-orange px-3 py-2 font-display text-sm tracking-wider text-white uppercase animate-pulse">
         Voting open
-        {countdown ? <span className="normal-case tracking-normal">· closes in {countdown}</span> : null}
+        {countdown ? (
+          <span className="normal-case tracking-normal">
+            · closes in {countdown}
+          </span>
+        ) : null}
       </span>
     );
   }
