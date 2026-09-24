@@ -9,82 +9,110 @@ export type AwardId =
   | "unhinged"
   | "stolen-idea";
 
+export type AwardDecision =
+  | "upvotes"
+  | "time-saved"
+  | "team-vote";
+
 export type AwardDef = {
   id: AwardId;
+  number: string;
   name: string;
   aka: string;
   description: string;
   /** If set, we can tease a live frontrunner from upvotes in this category */
   upvoteCategory?: SkillCategory;
-  humanJudged: boolean;
+  decision: AwardDecision;
   accent: "orange" | "antique" | "suede";
 };
 
 export const WRAP_PARTY_AWARDS: AwardDef[] = [
   {
     id: "crowd-favorite",
+    number: "01",
     name: "Crowd Favorite",
-    aka: "Most Upvoted — Overall",
+    aka: "Most upvoted — overall",
     description:
-      "The skill with the most ▲ across every category. Agency-wide crush. No niche needed — just vibes and votes.",
-    humanJudged: true,
+      "The skill we all wish we'd built. Won by the most upvotes in the Skills Tracker.",
+    decision: "upvotes",
     accent: "orange",
-  },
-  {
-    id: "personal-fave",
-    name: "Personal Fave",
-    aka: "Most Upvoted — Personal",
-    description:
-      "The personal skill the agency upvoted into orbit. Training wheels that somehow went viral in Slack.",
-    upvoteCategory: "personal",
-    humanJudged: true,
-    accent: "antique",
   },
   {
     id: "client-crush",
+    number: "02",
     name: "Client Crush",
-    aka: "Most Upvoted — Client Work",
+    aka: "Most upvoted — client work",
     description:
-      "Billable brilliance with the most ▲ energy. The skill clients will never know they should thank.",
+      "The skill doing the most for client work. Won by the most upvotes in Client Work.",
     upvoteCategory: "client work",
-    humanJudged: true,
+    decision: "upvotes",
     accent: "suede",
   },
   {
-    id: "ops-hero",
-    name: "Ops Hero",
-    aka: "Most Upvoted — Internal Ops",
-    description:
-      "Keeps the agency from inventing the same wheel every Tuesday. Quietly stolen by everyone.",
-    upvoteCategory: "internal ops",
-    humanJudged: true,
-    accent: "orange",
-  },
-  {
     id: "time-bandit",
+    number: "03",
     name: "Time Bandit",
-    aka: "Biggest Time-Saver",
+    aka: "Biggest time-saver",
     description:
-      "Stole the most hours back from the calendar gods. Judged on brags, receipts, and collective envy — not a spreadsheet.",
-    humanJudged: true,
+      "No votes, just math. Highest weekly time-savings estimate in the tracker wins.",
+    decision: "time-saved",
     accent: "antique",
   },
   {
-    id: "unhinged",
-    name: "Delightfully Unhinged",
-    aka: "Most Delightfully Weird",
+    id: "personal-fave",
+    number: "04",
+    name: "Personal Fave",
+    aka: "Most upvoted — personal",
     description:
-      "Weird in the best way. Made someone say “wait… what?” and then immediately ask for the link.",
-    humanJudged: true,
+      "Best skill for life outside work. Meal planners, this is your moment. Won by the most Personal upvotes.",
+    upvoteCategory: "personal",
+    decision: "upvotes",
+    accent: "antique",
+  },
+  {
+    id: "ops-hero",
+    number: "05",
+    name: "Ops Hero",
+    aka: "Most upvoted — internal ops",
+    description:
+      "Best internal ops skill — the work behind the work. Won by the most Internal Ops upvotes.",
+    upvoteCategory: "internal ops",
+    decision: "upvotes",
+    accent: "orange",
+  },
+  {
+    id: "unhinged",
+    number: "06",
+    name: "Delightfully Unhinged",
+    aka: "Most delightfully weird",
+    description:
+      "The weirdest, most unexpected thing anyone taught Claude to do. Won by team vote.",
+    decision: "team-vote",
     accent: "suede",
   },
   {
     id: "stolen-idea",
+    number: "07",
     name: "Stolen Idea Energy",
-    aka: "The Skill We All Wish We Thought of First",
+    aka: "Most-borrowed idea",
     description:
-      "So obvious in retrospect it hurts. Officially awarded by humans at the wrap party — the algorithm does not get a vote.",
-    humanJudged: true,
+      "The most-borrowed idea in the library. Copying is the highest compliment. Won by team vote.",
+    decision: "team-vote",
     accent: "orange",
   },
 ];
+
+export const TEAM_VOTE_AWARDS = WRAP_PARTY_AWARDS.filter(
+  (a) => a.decision === "team-vote",
+);
+
+export function decisionLabel(decision: AwardDecision): string {
+  switch (decision) {
+    case "upvotes":
+      return "Decided by upvotes";
+    case "time-saved":
+      return "Decided by time saved";
+    case "team-vote":
+      return "Team vote";
+  }
+}

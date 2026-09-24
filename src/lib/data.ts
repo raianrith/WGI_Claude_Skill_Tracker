@@ -243,6 +243,25 @@ export async function getRecentActivity(limit = 15) {
   return items;
 }
 
+export async function getMyAwardVotes(
+  voterId: string,
+): Promise<Partial<Record<"unhinged" | "stolen-idea", string>>> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("award_votes")
+    .select("award_id, skill_id")
+    .eq("voter_id", voterId);
+
+  if (error) throw error;
+
+  const votes: Partial<Record<"unhinged" | "stolen-idea", string>> = {};
+  for (const row of data ?? []) {
+    const awardId = row.award_id as "unhinged" | "stolen-idea";
+    votes[awardId] = row.skill_id as string;
+  }
+  return votes;
+}
+
 export function categoryCounts(skills: { category: SkillCategory }[]) {
   return {
     "client work": skills.filter((s) => s.category === "client work").length,

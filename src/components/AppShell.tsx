@@ -10,6 +10,7 @@ const LINKS = [
   { href: "/library", label: "Library" },
   { href: "/submit", label: "Ship a skill" },
   { href: "/leaderboard", label: "Crowd favorites" },
+  { href: "/vote", label: "Vote", highlight: true },
   { href: "/awards", label: "Awards" },
 ];
 
@@ -54,6 +55,7 @@ export function AppShell({
                 link.href === "/"
                   ? pathname === "/"
                   : pathname.startsWith(link.href);
+              const highlight = "highlight" in link && link.highlight && !active;
               return (
                 <Link
                   key={link.href}
@@ -61,7 +63,9 @@ export function AppShell({
                   className={`px-3 py-2 font-display text-sm tracking-wider uppercase transition-colors ${
                     active
                       ? "bg-orange text-white"
-                      : "text-lt-gray hover:bg-white/10 hover:text-white"
+                      : highlight
+                        ? "bg-orange/20 text-orange ring-1 ring-orange/60 hover:bg-orange hover:text-white"
+                        : "text-lt-gray hover:bg-white/10 hover:text-white"
                   }`}
                 >
                   {link.label}

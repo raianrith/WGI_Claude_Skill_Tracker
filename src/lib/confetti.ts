@@ -42,3 +42,29 @@ export function fireMilestoneConfetti() {
     disableForReducedMotion: true,
   });
 }
+
+export function fireVoteConfetti() {
+  confetti({
+    particleCount: 70,
+    spread: 65,
+    origin: { y: 0.65 },
+    colors: CONFETTI_COLORS,
+    disableForReducedMotion: true,
+  });
+  confetti({
+    particleCount: 40,
+    angle: 60,
+    spread: 50,
+    origin: { x: 0, y: 0.7 },
+    colors: CONFETTI_COLORS,
+    disableForReducedMotion: true,
+  });
+  confetti({
+    particleCount: 40,
+    angle: 120,
+    spread: 50,
+    origin: { x: 1, y: 0.7 },
+    colors: CONFETTI_COLORS,
+    disableForReducedMotion: true,
+  });
+}

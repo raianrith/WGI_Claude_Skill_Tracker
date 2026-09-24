@@ -1,7 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
-import { WRAP_PARTY_AWARDS } from "@/lib/awards";
+import {
+  WRAP_PARTY_AWARDS,
+  decisionLabel,
+  type AwardDecision,
+} from "@/lib/awards";
+import { getVotingStatus } from "@/lib/voting";
 
 const ACCENT_BORDER = {
   orange: "border-orange",
@@ -15,23 +21,43 @@ const ACCENT_TEXT = {
   suede: "text-suede",
 } as const;
 
+const DECISION_HINT: Record<AwardDecision, string> = {
+  upvotes: "Keep upvoting in the library — the leaderboard is the ballot.",
+  "time-saved":
+    "No campaigning needed. Highest weekly time-savings estimate wins.",
+  "team-vote":
+    "Cast your pick on the Vote page. Mon 8am → Wed noon. Tallies sealed until the wrap party.",
+};
+
 export function AwardsView() {
   const [openId, setOpenId] = useState<string | null>(null);
+  const votingOpen = getVotingStatus() === "open";
 
   return (
     <div className="space-y-8">
       <div className="border-t-4 border-orange bg-suede px-6 py-8 text-white sm:px-8">
         <p className="font-display text-sm tracking-[0.25em] text-lt-suede uppercase">
-          October 1 · Wrap party
+          Sept 30 · The Skillies wrap party
         </p>
         <h1 className="mt-2 font-display text-5xl tracking-wide uppercase">
           The awards
         </h1>
         <p className="mt-3 max-w-2xl text-sm text-lt-suede">
-          Not volume. Creativity. These are the trophies (metaphorical, unless
-          ELT gets wild) handed out when the rock is done. Every winner is
-          revealed at the wrap party — no spoilers from the algorithm.
+          Seven trophies. Most ride on upvotes or time saved. Two need a human
+          vote — Delightfully Unhinged and Stolen Idea Energy. Winners revealed
+          live at the wrap party.
         </p>
+        <Link
+          href="/vote"
+          className={`mt-6 inline-flex items-center gap-2 px-5 py-3 font-display text-sm tracking-wider uppercase transition-colors ${
+            votingOpen
+              ? "bg-orange text-white hover:bg-white hover:text-orange"
+              : "border border-lt-suede/50 text-white hover:border-orange hover:text-orange"
+          }`}
+        >
+          {votingOpen ? "Voting is open — cast your ballot" : "Go to the ballot"}
+          <span aria-hidden>→</span>
+        </Link>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -55,7 +81,7 @@ export function AwardsView() {
                     <p
                       className={`font-display text-xs tracking-[0.2em] uppercase ${ACCENT_TEXT[award.accent]}`}
                     >
-                      {award.aka}
+                      {award.number} · {award.aka}
                     </p>
                     <h2 className="mt-1 font-display text-3xl tracking-wide text-suede uppercase">
                       {award.name}
@@ -76,17 +102,24 @@ export function AwardsView() {
 
                 <div className="mt-4 border-t border-lt-gray pt-3">
                   <p className="font-display text-xs tracking-wider text-lt-suede uppercase">
-                    Winner revealed at wrap party
+                    {decisionLabel(award.decision)} · Winner at wrap party
                   </p>
                 </div>
               </button>
 
               {open && (
-                <div className="border-t border-lt-gray px-5 pb-5 pt-3">
+                <div className="border-t border-lt-gray px-5 pb-5 pt-3 space-y-3">
                   <p className="text-sm text-md-gray">
-                    This one&apos;s a human call. Lobby your friends, ship
-                    something shameless, and show up October 1.
+                    {DECISION_HINT[award.decision]}
                   </p>
+                  {award.decision === "team-vote" && (
+                    <Link
+                      href="/vote"
+                      className="inline-flex font-display text-sm tracking-wider text-orange uppercase hover:underline"
+                    >
+                      Open the ballot →
+                    </Link>
+                  )}
                 </div>
               )}
             </article>
